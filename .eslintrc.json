@@ -1,0 +1,68 @@
+{
+    "parser": "babel-eslint",
+    "plugins": [
+        "flowtype"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "experimentalObjectRestSpread": true
+    },
+    "settings": {
+        "flowtype": {
+            "onlyFilesWithFlowAnnotation": true
+        }
+    },
+    "env": {
+        "browser": true,
+        "amd": true,
+        "es6": true,
+        "node": true,
+        "mocha": true
+    },
+    "rules": {
+        "indent": [ "error", 4 ],
+        "no-trailing-spaces": "warn",
+        "comma-dangle": [ "error", "always-multiline" ],
+        "semi": [ "error", "always", {
+            "omitLastInOneLineBlock": true
+        } ],
+        "keyword-spacing": [ "warn", {
+            "before": true,
+            "after": true
+        } ],
+        "space-in-parens": [ "warn", "never" ],
+        "camelcase": [ "error", {
+            "properties": "always"
+        } ],
+        "eol-last": [ "warn", "unix" ],
+        "linebreak-style": [ "warn", "unix" ],
+        "object-curly-spacing": [ "warn", "always" ],
+        "array-bracket-spacing": [ "warn", "always" ],
+        "quotes": [ "warn", "single" ],
+        "no-undef": "warn",
+        "global-strict": 0,
+        "no-underscore-dangle": 0,
+        "no-console": 1,
+        "no-unused-vars": 1,
+        "no-trailing-spaces": [ 1, {
+            "skipBlankLines": true
+        } ],
+        "no-unreachable": 1,
+        "no-alert": 0,
+        "valid-typeof": 1,
+        "curly": 1,
+        "arrow-body-style": [ "warn", "as-needed" ],
+        "flowtype/define-flow-type": "warn",
+        "flowtype/require-parameter-type": [ "error", {
+            "excludeArrowFunctions": "expressionsOnly"
+        } ],
+        "flowtype/require-return-type": [ "error", {
+            "excludeArrowFunctions": "expressionsOnly"
+        } ],
+        "flowtype/require-valid-file-annotation": [ "error", "always" ],
+        "flowtype/space-after-type-colon": [ "warn", "always" ],
+        "flowtype/use-flow-type": "warn",
+        "flowtype/valid-syntax": "error"
+    }
+}

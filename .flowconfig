@@ -1,0 +1,12 @@
+[ignore]
+.*/node_modules/*
+
+[options]
+esproposal.class_static_fields=enable
+esproposal.class_instance_fields=enable
+
+suppress_type=$FlowIssue
+suppress_type=$FlowFixMe
+
+suppress_comment=\\(.\\|\n\\)*\\$FlowFixMe\\($\\|[^(]\\|(\\(>=0\\.\\(3[0-1]\\|[1-2][0-9]\\|[0-9]\\).[0-9]\\)? *\\(site=[a-z,_]*relay[a-z,_]*\\)?)\\)
+suppress_comment=\\(.\\|\n\\)*\\$FlowIssue\\((\\(>=0\\.\\(3[0-1]\\|[1-2][0-9]\\|[0-9]\\).[0-9]\\)? *\\(site=[a-z,_]*relay[a-z,_]*\\)?)\\)? #[0-9]+
