@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint -c .eslintrc.json src/",
-    "build": "babel --watch=./ --out-dir=./build --ignore=./node_modules/"
+    "build": "babel --out-dir=./build --ignore=./node_modules/"
   },
   "repository": {
     "type": "git",
