@@ -21,3 +21,26 @@ project's root containing something like
 ```
 
 and `haste-mapper` will recognize it as a named module and will add it to the modules list.
+Now for actually using the `haste-mapper` to generate the modules list you want, the
+following prototype must be introduced:
+
+```js
+type ModuleScannerInitDataType = {
+    root: string,
+};
+type ModulesList = {
+    [moduleName: string]: string,
+};
+
+scanModules(data: ModuleScannerInitDataType): Promise<ModulesList>;
+```
+
+You will have to use it as follows:
+
+```js
+const haste = require('haste-mapper');
+
+haste.scanModules({ root: '/something' }).then(modulesList => {
+    console.log(modulesList);
+});
+```
