@@ -5,7 +5,8 @@
   "main": "build/index.js",
   "scripts": {
     "lint": "eslint -c .eslintrc.json src/",
-    "build": "babel --out-dir=./build --ignore=./node_modules/"
+    "build": "babel --out-dir=./build --ignore=./node_modules/",
+    "preinstall": "npm run build"
   },
   "repository": {
     "type": "git",
