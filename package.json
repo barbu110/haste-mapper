@@ -2,7 +2,7 @@
   "name": "haste-mapper",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
     "lint": "eslint -c .eslintrc.json src/",
     "build": "babel --out-dir=./build --ignore=./node_modules/"
