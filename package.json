@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "lint": "eslint -c .eslintrc.json src/",
-    "prepublish": "gulp build",
+    "prepublish": "gulp build"
   },
   "repository": {
     "type": "git",
