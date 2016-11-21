@@ -2,7 +2,7 @@
  * @flow
  */
 
-const scanModules = require('./src/scanModules');
+const scanModules = require('./scanModules');
 
 module.exports = {
     scanModules,
