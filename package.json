@@ -1,11 +1,11 @@
 {
   "name": "haste-mapper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "build/index.js",
   "scripts": {
     "lint": "eslint -c .eslintrc.json src/",
-    "prepublish": "gulp build"
+    "postinstall": "gulp build"
   },
   "repository": {
     "type": "git",
