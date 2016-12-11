@@ -26,7 +26,16 @@ following prototype must be introduced:
 
 ```js
 type ModuleScannerInitDataType = {
+    /**
+     * Root directory to scan files in.
+     */
     root: string,
+
+    /**
+     * Paths to additional files to be scanned and added
+     * to the modules map.
+     */
+    files: string[],
 };
 type ModulesList = {
     [moduleName: string]: string,
@@ -44,3 +53,22 @@ haste.scanModules({ root: '/something' }).then(modulesList => {
     console.log(modulesList);
 });
 ```
+
+Or, if you want to also scan specific files:
+
+```js
+const haste = require('haste-mapper');
+
+haste.scanModules({
+    root: '/some-root',
+    files: [
+        path.resolve('./myFile.js'),
+        path.resolve('./myOtherFile.js'),
+    ],
+}).then(modulesList => {
+    console.log(modulesList);
+});
+```
+
+**Note:** Passing the `root` key is currently required. This will not be necessary in a future
+release. Passing **either** `root` or `files` will be required then.
