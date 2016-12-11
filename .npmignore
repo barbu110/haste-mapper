@@ -1,1 +1,4 @@
+node_modules/
 src/
+/haste-mapper.sublime-project
+/haste-mapper.sublime-workspace
