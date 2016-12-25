@@ -129,3 +129,21 @@ Returns the module name as documented in the module definition of the file.
 Checks if the module should be ignored. A module is ignored if the property
 `ignoreModule` is found in the module definition block. If a module is ignored
 it should not be taken into account by the associated `babel-plugin-haste-require`.
+
+### Class `ModulesMapUtils`
+
+Utilities for the `ModulesMap` type.
+
+#### Type `PlainModulesMap`
+
+Used as return type for `ModulesMapUtils#toPlainObject`. Defined as:
+
+```js
+type PlainModulesMap = { [moduleName: string]: string };
+```
+
+#### Static method `toPlainObject(modules: ModulesList): PlainModulesMap`
+
+Converts a map of type `ModulesList` to a plain object, where keys represent
+the modules names and values represent the source file path. Note that this
+**will not** include the ignored modules.
