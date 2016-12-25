@@ -1,4 +1,8 @@
+[![npm version](https://badge.fury.io/js/haste-mapper.svg)](https://badge.fury.io/js/haste-mapper)
+
 # haste-mapper
+
+[![NPM](https://nodei.co/npm/haste-mapper.png?downloads=true&stars=true)](https://nodei.co/npm/haste-mapper/)
 
 Inspired from Facebook's [`node-haste`](https://github.com/facebookarchive/node-haste),
 `haste-mapper` is a modules list builder.
