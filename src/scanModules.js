@@ -2,110 +2,113 @@
  * @flow
  */
 
-const path = require('path');
-const fs = require('fs');
-const isNpmModule = require('./DependencyGraph/isNpmModule');
-const walk = require('fs-walk');
-const Docblock = require('./DependencyGraph/docblock');
-const Module = require('./Module');
-const waterfall = require('async').waterfall;
-const each = require('async').each;
+import path from 'path';
+import fs from 'fs';
+import isNpmModule from './DependencyGraph/isNpmModule';
+import walk from 'fs-walk';
+import Docblock from './DependencyGraph/docblock';
+import DupeDefinitionError from './Error/DupeDefinitionError';
+import InvalidDirectoryError from './Error/InvalidDirectoryError';
+import Module from './Module';
+import { waterfall, each } from 'async';
 
 type ModuleScannerInitDataType = {
-    root: string,
+    rootDir: string|string[],
     files: string[],
 };
-type ModulesList = { [moduleName: string]: string };
+type ModulesList = Map<string, Module>;
+
+let modulesList: ModulesList = new Map();
+
+const defaultExtensions = [
+    '.js',
+    '.json',
+    '.es6',
+    '.flow',
+];
 
 /**
- * Process a file from the given path.
+ * Scan a directory and process every file under its root.
  *
- * @param  {Docblock} parser The docblock parser.
- * @param  {string} file The location of the file to parse
- * @param  {(err: ?Object, m: ?Module, hasModule: bool)} callback
+ * @param {string} rootDir The directory to scan.
+ * @param {ModulesList} curr The current modules list.
+ * @param {(err: ?Object, m: ModulesList)} callback
  */
-function processFile(
-    parser: Docblock,
-    file: string,
-    callback: (err: ?Object, m: ?Module, hasModule: bool) => void
+function processDirectory(
+    rootDir: string,
+    curr: ModulesList,
+    callback: (err: ?Object, m: ModulesList) => void
 ): void {
-    fs.readFile(file, 'utf8', (err, data) => {
+    const parser = new Docblock();
+
+    walk.files(rootDir, (basedir, filename, stat, nextFile) => {
+        const file = path.resolve(path.join(basedir, filename));
+
+        if(!defaultExtensions.includes(path.extname(file))) {
+            nextFile();
+            return;
+        }
+
+        Module.newFromFile(file, (err: ?Object, m: ?Module) => {
+            if (err) {
+                nextFile(err);
+                return;
+            }
+            if (!m) {
+                nextFile();
+                return;
+            }
+
+            const moduleName = m.moduleName();
+
+            if (modulesList.has(moduleName)) {
+                nextFile(new DupeDefinitionError(modulesList.get(moduleName), m ));
+                return;
+            }
+
+            modulesList.set(moduleName, m);
+            nextFile();
+        });
+    }, (err) => {
         if (err) {
             callback(err);
             return;
         }
-
-        const docs = parser.extract(data);
-        const parsedDocs = parser.parseAsObject(docs);
-
-        if (parsedDocs.hasOwnProperty('providesModule')) {
-            const moduleName = parsedDocs.providesModule;
-            const ignore = parsedDocs.hasOwnProperty('ignoreModule');
-
-            const m = new Module({
-                srcPath: file,
-                moduleName,
-                ignore,
-            });
-
-            callback(undefined, m, true);
-        } else {
-            callback(undefined, undefined, false);
-        }
+        callback(undefined, modulesList);
     });
 }
 
 /**
  * Scan modules with the given configuration.
  */
-function scanModules({ root, files }: ModuleScannerInitDataType): Promise<ModulesList> {
-    root = path.resolve(root);
-    let modulesList: ModulesList = {};
+export default function scanModules({ rootDir, files }: ModuleScannerInitDataType): Promise<ModulesList> {
+    if (typeof rootDir === 'string') {
+        rootDir = [ rootDir ];
+    }
+    rootDir = rootDir.map(d => path.resolve(d));
+
     const parser = new Docblock();
 
-    const rootStat = fs.statSync(root);
-    if (!rootStat.isDirectory()) {
-        throw new Error(`The provided path is not a directory: ${root}`);
-    }
-
     return new Promise((resolve, reject) => {
+        rootDir.forEach(d => {
+            const st = fs.statSync(d);
+            if (!st.isDirectory()) {
+                reject(new InvalidDirectoryError(d));
+                return;
+            }
+        });
+
         waterfall([
-            (next) => walk.files(root, (basedir, filename, stat, nextFile) => {
-                const file = path.resolve(path.join(basedir, filename));
+            (next) => each(rootDir, (r: string, nextrootDir: Function) => {
+                processDirectory(r, modulesList, (err: ?Object, m: ModulesList) => {
+                    modulesList = new Map([
+                        ...modulesList,
+                        ...m
+                    ]);
 
-                processFile(parser, file, (err: ?Object, m: ?Module, hasModule: ?bool) => {
-                    if (err) {
-                        nextFile(err);
-                        return;
-                    }
-                    if (!hasModule) {
-                        nextFile();
-                        return;
-                    }
-
-                    const moduleName = m.moduleName();
-                    const ignore = m.isIgnored();
-                    const moduleSource = m.srcPath();
-
-                    if (modulesList.hasOwnProperty(moduleName)) {
-                        const originalSource = modulesList[moduleName];
-
-                        nextFile(new Error(
-                            `Duplicate definition of "${moduleName}" found in ${original} and ${moduleName}.`
-                        ));
-                        return;
-                    }
-
-                    modulesList[moduleName] = file;
-                    nextFile();
+                    nextrootDir(err);
                 });
-            }, (err) => {
-                if (err) {
-                    next(err);
-                    return;
-                }
-                next();
-            }),
+            }, next),
             (next) => {
                 if (!files) {
                     next();
@@ -113,31 +116,25 @@ function scanModules({ root, files }: ModuleScannerInitDataType): Promise<Module
                 }
 
                 each(files, (file: string, nextFile: Function) => {
-                    processFile(parser, file, (err: ?Object, m: ?Module, hasModule: ?bool) => {
+                    Module.newFromFile(file, (err: ?Object, m: ?Module) => {
                         if (err) {
                             nextFile(err);
                             return;
                         }
-                        if (!hasModule) {
+                        if (!m) {
                             nextFile();
                             return;
                         }
 
                         const moduleName = m.moduleName();
-                        const ignore = m.isIgnored();
-                        const moduleSource = m.srcPath();
 
                         if (modulesList.hasOwnProperty(moduleName)) {
-                            const originalSource = modulesList[moduleName];
-
-                            nextFile(new Error(
-                                `Duplicate definition of "${moduleName}" found in ${original} and ${moduleName}.`
-                            ));
+                            nextFile(new DupeDefinitionError(modulesList.get(moduleName), m ));
                             return;
                         }
 
+                        modulesList.set(moduleName, m);
                         nextFile();
-                        modulesList[moduleName] = file;
                     });
                 }, next);
             },
@@ -150,5 +147,3 @@ function scanModules({ root, files }: ModuleScannerInitDataType): Promise<Module
         });
     });
 }
-
-module.exports = scanModules;

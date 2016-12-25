@@ -39,9 +39,14 @@ gulp.task('build', done => {
         (filelist, next) => each(filelist, (file, callback) => {
             waterfall([
                 (next) => babel.transformFile(file, babelOptions, (err, result) => {
+					console.log(`Processing file ${file}...`);
                     file = file.replace(/\/src\//g, '/build/');
 
-                    next(undefined, file, result.code);
+                    if (err) {
+                        console.log(err);
+                    }
+
+					next(undefined, file, result.code);
                 }),
                 (file, code, next) => fs.createFile(file, err => next(err, file, code)),
                 (file, code, next) => fs.writeFile(file, code, next),
